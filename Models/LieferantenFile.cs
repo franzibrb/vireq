@@ -29,5 +29,22 @@ namespace WebAppl.Models
         /// Spaltenname des Lieferantennamens
         /// </summary>
         public string LieferantenNameColumnNameFromCSVImport { get; set; }
+
+
+        /// <summary>
+        /// Spaltenname der Straße
+        /// </summary>
+        public string LieferantenStraßeColumnNameFromCSVImport { get; set; }
+
+
+        /// <summary>
+        /// Spaltenname der PLZ
+        /// </summary>
+        public string LieferantenPLZColumnNameFromCSVImport { get; set; }
+
+        /// <summary>
+        /// Spaltenname des Ortes
+        /// </summary>
+        public string LieferantenOrtColumnNameFromCSVImport { get; set; }
     }
 }

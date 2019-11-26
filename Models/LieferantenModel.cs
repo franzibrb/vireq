@@ -5,7 +5,7 @@ using System.Web;
 
 namespace WebAppl.Models
 {
-    public class HomeModel
+    public class LieferantenModel
     {
 
 

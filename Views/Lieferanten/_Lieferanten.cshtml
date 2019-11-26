@@ -1,0 +1,139 @@
+﻿
+@using NonFactors.Mvc.Grid;
+@model WebAppl.Models.LieferantenModel
+
+<h3>Ihre Kunden</h3>
+<div id="LieferantenFile">
+    @if (Model.Lieferanten?.Count == 0)
+    {
+        @:Sie haben noch keine Kunden importiert.
+    }
+    else
+    {
+        @:Sie haben Ihre Kunden zuletzt am @Model.LieferantenFile.LieferantenUpdatedAt durch das Hochladen der Datei @Model.LieferantenFile.LieferantenFileName aktualisiert.
+    }
+</div>
+<div id="UploadLieferanten">
+    <form id="UploadLieferantenForm" enctype="multipart/form-data" action="@Url.Action("UploadLieferantenFile", "File")" method="POST">
+        <div class="form-group">
+            <input type="file" id="dataFile" name="file" />
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Upload" class="btn btn-default" />
+        </div>
+
+        <div id="LieferantenUploadResult">
+
+        </div>
+    </form>
+
+
+</div>
+
+
+<div id="LieferantenGrid">
+    @if (Model.Lieferanten?.Count > 0)
+    {
+        <div class="form-group">
+            <input type="button" id="ExportLieferantenButton" class="btn btn-default" value="Exportieren" onclick="location.href='@Url.Action("DownloadLieferantenFile","File")'" />
+        </div>
+    }
+    @(Html
+        .Grid(Model.Lieferanten)
+        .Build(columns =>
+        {
+            columns.Add(model => Html.CheckBox(model.LieferantId.ToString()));
+            columns.Add(model => model.Lieferantennummer).Titled(Model.LieferantenFile?.LieferantenNummerColumnNameFromCSVImport);
+            columns.Add(model => model.Lieferantenname).Titled(Model.LieferantenFile?.LieferantenNameColumnNameFromCSVImport);
+            columns.Add(model => model.Straße).Titled(Model.LieferantenFile?.LieferantenStraßeColumnNameFromCSVImport);
+            columns.Add(model => model.PLZ).Titled(Model.LieferantenFile?.LieferantenPLZColumnNameFromCSVImport);
+            columns.Add(model => model.Ort).Titled(Model.LieferantenFile?.LieferantenOrtColumnNameFromCSVImport);
+
+        })
+        .Empty("Keine Kunden vorhanden")
+        .Filterable()
+        .Sortable()
+    )
+
+    <div class="form-group">
+        <input type="button" id="DeleteLieferantenButton" class="btn btn-default" value="Löschen" />
+    </div>
+    <div id="LieferantenDeleteResult">
+    </div>
+</div>
+@Html.ValidationMessage("lieferantenabfrage", new { @class = "text-danger" })
+
+
+<script type="text/javascript">
+
+    $('#UploadLieferantenForm').submit(function (e) {
+        e.preventDefault(); // stop the standard form submission
+
+        $.ajax({
+            url: this.action,
+            type: this.method,
+            data: new FormData(this),
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                // refresh der Lieferanten
+                $('#Lieferanten').load('/Lieferanten/Index');
+
+            },
+            error: function (xhr, error, status) {
+                // Danke IIS fürs Verschlucken meines Statustextes; sollte produktiv die Meldung aus der Action liefern
+                $('#LieferantenUploadResult').html(xhr.statusText);
+            }
+        });
+    });
+
+
+
+    $('#DeleteLieferantenButton').click(function (e) {
+
+        // angehakte Checkboxen sammeln
+        var checkedLieferantenInputCheckboxes = $("#LieferantenGrid td input[type=checkbox]:checked");
+        var lieferantenIds = [];
+        if (checkedLieferantenInputCheckboxes.length > 0) {
+
+            //IDs der zu löschenden Lieferanten aufsammeln
+            checkedLieferantenInputCheckboxes.each(function () {
+                var lieferantenId = parseInt($(this).attr("name"));
+                lieferantenIds.push(lieferantenId);
+            })
+
+
+            //Call Delete Action method.
+            $.ajax({
+                type: "POST",
+                url: "/Lieferanten/Delete",
+                data: JSON.stringify({ lieferantenIds: lieferantenIds }),
+                contentType: "application/json; charset=utf-8",
+                traditional: true,
+                success: function (response) {
+                    // Zeilen entfernen
+                    checkedLieferantenInputCheckboxes.each(function () {
+                        var row = $(this).closest("tr");
+                        if ($("#LieferantenGrid TBODY tr").length == 1) {
+                            row.find("td").html("&nbsp;");
+                            row.find("input").hide();
+                        } else {
+                            row.remove();
+                        }
+                    });
+                },
+                error: function (xhr, error, status) {
+                    // Danke IIS fürs Verschlucken meines Statustextes; sollte produktiv die Meldung aus der Action liefern
+                    $('#LieferantenDeleteResult').html(xhr.statusText);
+                }
+            });
+
+        }
+    });
+
+    [].forEach.call(document.getElementsByClassName('mvc-grid'), function (element) {
+        new MvcGrid(element);
+    });
+</script>

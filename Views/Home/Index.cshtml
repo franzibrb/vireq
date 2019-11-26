@@ -1,89 +1,16 @@
-﻿
-@using NonFactors.Mvc.Grid;
-@model WebAppl.Models.HomeModel
-
-
-@{
+﻿@{
     ViewBag.Title = "Home Page";
 
 
 }
 
 <div class="row">
-    <h3>Ihre Kunden</h3>
-    @if (Model.Lieferanten.Count == 0)
-    {
-        @:Sie haben noch keine Kunden importiert.
-    }
-    else
-    {
-        @:Sie haben Ihre Kunden zuletzt am @Model.LieferantenFile.LieferantenUpdatedAt durch das Hochladen der Datei @Model.LieferantenFile.LieferantenFileName aktualisiert.
-    }
-    <div id="UploadLieferanten">
-        <form id="lieferantenupload" enctype="multipart/form-data" action="@Url.Action("UploadLieferantenFile", "Upload")" method="POST">
-            <div class="form-group">
-                <input type="file" id="dataFile" name="file" />
-            </div>
+    <div id="Lieferanten">
 
-            <div class="form-group">
-                <input type="submit" value="Upload" class="btn btn-default" />
-            </div>
-            <div id="lieferantenupdateResult">
-
-            </div>
-        </form>
-
+        @{ Html.RenderAction("Index","Lieferanten");  }
 
     </div>
-
-
-
-    @(Html
-        .Grid(Model.Lieferanten)
-        .Build(columns =>
-        {
-        columns.Add(model => model.Lieferantennummer).Titled(Model.LieferantenFile?.LieferantenNummerColumnNameFromCSVImport);
-        columns.Add(model => model.Lieferantenname).Titled(Model.LieferantenFile?.LieferantenNameColumnNameFromCSVImport);
-        columns.Add(model => model.Straße).Titled("Straße");
-        columns.Add(model => model.PLZ).Titled("PLZ");
-
-        columns.Add(model => model.Ort).Titled("Ort");
-
-
-
-        })
-        .Empty("Keine Kunden vorhanden")
-        .Filterable()
-        .Sortable()
-    )
-
-    @Html.ValidationMessage("lieferantenabfrage", new { @class = "text-danger" })
-
 </div>
-
 <div class="row">
-
+    blub blub
 </div>
-<script type="text/javascript">
-    $('#lieferantenupload').submit(function (e) {
-        e.preventDefault(); // stop the standard form submission
-
-        $.ajax({
-            url: this.action,
-            type: this.method,
-            data: new FormData(this),
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function (data) {
-                // refresh der Lieferanten
-                $.get('@Url.Action("Index","Home")', function (data) { });
-
-            },
-            error: function (xhr, error, status) {
-                // Danke IIS fürs Verschlucken meines Statustextes; sollte produktiv die Meldung aus der Action liefern
-                $('#lieferantenupdateResult').html(xhr.statusText);
-            }
-        });
-    });
-</script>
