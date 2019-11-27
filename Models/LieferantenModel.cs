@@ -5,6 +5,9 @@ using System.Web;
 
 namespace WebAppl.Models
 {
+    /// <summary>
+    /// Kapselt die Lieferanten und Lieferantendatei eines Nutzers
+    /// </summary>
     public class LieferantenModel
     {
 

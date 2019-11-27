@@ -37,7 +37,7 @@ namespace WebAppl.Models
             }
             catch (Exception e)
             {
-                Log.Error("Lieferanten für Nutzer mit UserId " + UserId + " konnten nicht abgefragt werden. ");
+                Log.Error(e.Message);
                 return null;
             }
         }
@@ -58,7 +58,7 @@ namespace WebAppl.Models
             }
             catch (Exception e)
             {
-                Log.Error("Lieferant mit LieferantId " + LieferantId + " konnte nicht abgefragt werden. ");
+                Log.Error(e.Message);
                 return null;
             }
         }
@@ -79,7 +79,7 @@ namespace WebAppl.Models
             }
             catch (Exception e)
             {
-                Log.Error("Nutzer mit UserId " + UserId + " nicht in DB. ");
+                Log.Error(e.Message);
                 return null;
             }
         }
@@ -118,7 +118,7 @@ namespace WebAppl.Models
         }
 
         /// <summary>
-        /// Aktualisiert den übergebenen Lieferanten.
+        /// Aktualisiert den übergebenen Lieferanten mit der Lieferantennummer und der NutzerId.
         /// Exisitert der Lieferant noch nicht in der DB, wird er neu eingefügt.
         /// </summary>
         /// <param name="Lieferant"></param>
@@ -146,8 +146,11 @@ namespace WebAppl.Models
                 }
                 else
                 {
-                    Lieferant.LieferantId = Lieferant.LieferantId;
-                    this.Entry(Lieferant).CurrentValues.SetValues(Lieferant);
+                    Lieferanten.Attach(lieferant);
+                    lieferant.Lieferantenname = Lieferant.Lieferantenname;
+                    lieferant.Straße = Lieferant.Straße;
+                    lieferant.Ort = Lieferant.Ort;
+                    lieferant.PLZ = Lieferant.PLZ;
                     if (SaveChanges() == 0)
                     {
                         Log.Info("Lieferant  " + Lieferant.Lieferantennummer + " für Nutzer " + Lieferant.UserId + " wurde nicht aktualisiert.");

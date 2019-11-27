@@ -59,8 +59,65 @@ namespace WebAppl.Controllers
                 Log.Error(e.Message);
                 ModelState.AddModelError("lieferantenabfrage", "Es ist ein Fehler bei der Abfrage Ihrer Kunden aufgetreten.");
             }
-            return PartialView("~/Views/Lieferanten/_Lieferanten.cshtml",model);
-            
+            return PartialView("~/Views/Lieferanten/_Lieferanten.cshtml", model);
+
+        }
+
+        // GET: Lieferant/Details
+        [CustomAuthorize]
+        [HttpGet]
+        public ActionResult Details(int lieferantenId)
+        {
+            try
+            {
+                Lieferant lieferant = null;
+
+                //Lieferant abfragen
+                using (ApplicationDbContext context = new ApplicationDbContext())
+                {
+                    lieferant = context.GetLieferantById(lieferantenId);
+                    if (lieferant != null)
+                    {
+                        return PartialView("~/Views/Lieferanten/_LieferantenDetail.cshtml", lieferant);
+
+                    }
+                    else
+                    {
+                        return new HttpNotFoundResult("Lieferant mit Id " + lieferantenId + " nicht gefunden");
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.InternalServerError, "Bei der Abfrage des Lieferanten mit Id " + lieferantenId + " ist ein Fehler aufgetreten.");
+
+            }
+
+        }
+
+        // POST: Lieferant/Details
+        [CustomAuthorize]
+        [HttpPost]
+        public ActionResult Details(Lieferant Lieferant)
+        {
+            try
+            {
+                using (ApplicationDbContext context = new ApplicationDbContext())
+                {
+                    context.UpdateLieferant(Lieferant);
+                    
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.InternalServerError, "Beim Aktualiseren des Lieferanten mit Id " + Lieferant.LieferantId + " ist ein Fehler aufgetreten.");
+
+            }
+            return new HttpStatusCodeResult(System.Net.HttpStatusCode.OK);
+
         }
 
 
@@ -79,15 +136,15 @@ namespace WebAppl.Controllers
                     {
                         IEnumerable<Lieferant> lieferanten = new List<Lieferant>();
 
-                        for (int i = 0; i <lieferantenIds.Length;i++)
+                        for (int i = 0; i < lieferantenIds.Length; i++)
                         {
                             Lieferant lieferant = context.GetLieferantById(int.Parse(lieferantenIds[i]));
-                            if(lieferant != null)
+                            if (lieferant != null)
                             {
                                 context.DeleteLieferant(lieferant);
                             }
                         }
-                    
+
                     }
                 }
 

@@ -18,6 +18,7 @@ namespace WebAppl.Models
         /// Referenz auf den Nutzer, zu dem dieser Lieferant gehört
         /// </summary>
         public int UserId { get; set; }
+
         public int Lieferantennummer { get; set; }
         public string Lieferantenname { get; set; }
         public string Straße { get; set; }
