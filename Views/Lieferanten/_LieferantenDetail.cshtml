@@ -6,9 +6,9 @@
         <h4 class="modal-title" id="myModalLabel">Lieferant bearbeiten</h4>
     </div>
     <form id="UpdateLieferant" action="@Url.Action("Details", "Lieferanten")" method="POST">
-        @Html.HiddenFor(model => model.LieferantId);
-        @Html.HiddenFor(model => model.Lieferantennummer);
-        @Html.HiddenFor(model => model.UserId);
+        @Html.HiddenFor(model => model.LieferantId)
+        @Html.HiddenFor(model => model.Lieferantennummer)
+        @Html.HiddenFor(model => model.UserId)
 
 
         <dl class="dl-horizontal">
@@ -76,7 +76,9 @@
                 $('#LieferantenModelDialog').modal('hide');
 
                 // refresh der Lieferanten
-                $('#Lieferanten').load('/Lieferanten/Index');
+                new MvcGrid(document.querySelector('#lieferanten-grid')).reload();
+
+                //$('#Lieferanten').load('/Lieferanten/Index');
 
             },
             error: function (xhr, error, status) {

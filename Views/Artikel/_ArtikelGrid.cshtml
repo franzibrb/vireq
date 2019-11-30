@@ -1,0 +1,20 @@
+﻿
+@using WebAppl.Models
+@model WebAppl.Models.ArtikelModel
+
+@(Html
+   .Grid(Model.Artikel)
+   .Build(columns =>
+   {
+
+       columns.Add(model => Html.ActionLink("Bearbeiten", "Details", new { artikelId = model.ArtikelId }, new { @class = "artikel-detail-button" }));
+       columns.Add(model => model.Artikelnummer).Titled(Model.Palette.ArtikelFile.ArtikelnummerColumnNameFromCSVImport);
+       columns.Add(model => model.Artikelname).Titled(Model.Palette.ArtikelFile.ArtikelnameColumnNameFromCSVImport);
+
+
+   })
+   .Empty("Keine Artikel vorhanden")
+   .Id("artikel-grid")
+   .Filterable()
+   .Sortable()
+)

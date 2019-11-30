@@ -1,0 +1,61 @@
+﻿
+@model WebAppl.Models.Artikel
+<div>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title" id="myModalLabel">Artikel bearbeiten</h4>
+    </div>
+    <form id="UpdateArtikel" action="@Url.Action("Details", "Artikel")" method="POST">
+        @Html.HiddenFor(model => model.ArtikelId)
+        @Html.HiddenFor(model => model.Artikelnummer)
+        @Html.HiddenFor(model => model.PaletteId) 
+
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.Artikelnummer)
+            </dt>
+            <dd>
+                @Html.DisplayTextFor(model => model.Artikelnummer)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Artikelname)
+            </dt>
+
+            <dd>
+                @Html.TextBoxFor(model => model.Artikelname)
+            </dd>
+
+        </dl>
+        <div class="form-group">
+            <input type="submit" value="Speichern" class="btn btn-default" />
+        </div>
+    </form>
+
+</div>
+
+
+<script type="text/javascript">
+
+    // Lieferantendatei hochladen
+    $('#UpdateArtikel').submit(function (e) {
+        e.preventDefault(); // stop the standard form submission
+
+        $.ajax({
+            url: this.action,
+            type: this.method,
+            data: new FormData(this),
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                //Modal schließen
+                $('#ArtikelModalDialog').modal('hide');
+                new MvcGrid(document.querySelector('#artikel-grid')).reload();
+
+            },
+            error: function (xhr, error, status) {
+                // Danke IIS fürs Verschlucken meines Statustextes; sollte produktiv die Meldung aus der Action liefern
+            }
+        });
+    });
+</script>

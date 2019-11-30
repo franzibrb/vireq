@@ -19,12 +19,16 @@ namespace WebAppl.Models
         /// </summary>
         public int UserId { get; set; }
 
+
         public int Lieferantennummer { get; set; }
         public string Lieferantenname { get; set; }
         public string Straße { get; set; }
         public int PLZ { get; set; }
         public string Ort { get; set; }
 
-        
+        /// <summary>
+        /// Paletten dieses Lieferanten
+        /// </summary>
+        public List<Palette> Paletten { get; set; }
     }
 }

@@ -17,6 +17,8 @@ namespace WebAppl.Models
 
         public DbSet<User> Users { get; set; }
         public DbSet<Lieferant> Lieferanten { get; set; }
+        public DbSet<Palette> Paletten { get; set; }
+        public DbSet<Artikel> Artikel { get; set; }
 
         /// <summary>
         /// Liefert die Lieferanten für den Nutzer mit der übergebenen UserId. 
@@ -33,7 +35,79 @@ namespace WebAppl.Models
                       (from lieferant in Lieferanten
                        where lieferant.UserId == UserId
                        select lieferant);
+
+                lieferanten.ToList().ForEach(l => l.Paletten = GetPalettenForLieferantWithId(l.LieferantId)?.ToList());
                 return lieferanten;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Liefert die Paletten für den Lieferanten mit der übergebenen LieferantenId. 
+        /// 
+        /// </summary>
+        /// <param name="LieferantenId">Id des Lieferanten, für den Paltten abgefragt werden sollen</param>
+        /// <returns>Liste von Paletten für den übergebenen LieferantenId oder null im Fehlerfall </returns>
+        public IEnumerable<Palette> GetPalettenForLieferantWithId(int LieferantenId)
+        {
+            IEnumerable<Palette> paletten = new List<Palette>();
+            try
+            {
+                paletten =
+                      (from p in Paletten
+                       where p.LieferantId == LieferantenId
+                       select p);
+
+                paletten.ToList().ForEach(p => p.Artikel = GetArtikelForPaletteWithId(p.PaletteId)?.ToList());
+                return paletten;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+        public Palette GetPaletteById(int PalettenId)
+        {
+            try
+            {
+                var palette =
+                      (from p in Paletten
+                       where p.PaletteId == PalettenId
+                       select p).FirstOrDefault();
+
+                palette.Artikel = GetArtikelForPaletteWithId(PalettenId)?.ToList();
+                return palette;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Liefert die Artikel für die Palette mit der übergebenen PalettenId. 
+        /// 
+        /// </summary>
+        /// <param name="PalettenId">Id der Palette, für welche Artikel abgefragt werden sollen</param>
+        /// <returns>Liste von Artikeln für die referenzierte Palette oder null im Fehlerfall </returns>
+        public IEnumerable<Artikel> GetArtikelForPaletteWithId(int PalettenId)
+        {
+            IEnumerable<Artikel> artikel = new List<Artikel>();
+            try
+            {
+                artikel =
+                      (from a in Artikel
+                       where a.PaletteId == PalettenId
+                       select a);
+
+                return artikel;
             }
             catch (Exception e)
             {
@@ -54,6 +128,28 @@ namespace WebAppl.Models
                 var lieferant = (from lief in Lieferanten
                                  where lief.LieferantId == LieferantId
                                  select lief).FirstOrDefault();
+                return lieferant;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+
+        /// <summary>
+        /// Liefert den Lieferanten mit der übergebenen LieferantenId. 
+        /// </summary>
+        /// <param name="LieferantId">Id des Lieferanten, der abgefragt werden soll</param>
+        /// <returns>Lieferant mit der übergebenen Id oder null im Fehlerfall</returns>
+        public Lieferant GetLieferantByLieferantennummer(int lieferantenNummer)
+        {
+            try
+            {
+                var lieferant = (from lief in Lieferanten
+                                 where lief.Lieferantennummer == lieferantenNummer
+                                 select lief).First();
                 return lieferant;
             }
             catch (Exception e)
@@ -191,6 +287,131 @@ namespace WebAppl.Models
                     Log.Error("Lieferant  " + Lieferant.Lieferantennummer + " für Nutzer " + Lieferant.UserId + " wurde nicht gefunden und konnte nicht gelöscht werden.");
                 }
 
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+
+            }
+
+        }
+
+
+
+
+        public int UpdateArtikelDateiForLieferantAndPalette(int LieferantId, int PalettenId, ArtikelFile ArtikelFile)
+        {
+            int retVal = -1;
+            try
+            {
+                // Lieferanten holen
+                var lieferant = (from l in Lieferanten where l.LieferantId == LieferantId select l).FirstOrDefault();
+
+                if (lieferant == null)
+                {
+                    Log.Error("Lieferant mit LieferantId " + LieferantId + " nicht in DB. Aktualisieren der Artikel nicht möglich.");
+                }
+                else
+                {
+                    // Palette holen
+                    var palette = (from p in Paletten where p.PaletteId == PalettenId && p.LieferantId == LieferantId select p).FirstOrDefault();
+
+                    // noch keine da --> neu anlegen
+                    if (palette == null)
+                    {
+                        Palette added = Paletten.Add(new Palette()
+                        {
+                            LieferantId = LieferantId,
+                            ArtikelFile = ArtikelFile
+
+                        });
+                        if (SaveChanges() == 1)
+                        {
+                            retVal = added.PaletteId;
+                        }
+                        else
+                        {
+                            Log.Error("Hinzufügen einer neuen Palette für Lieferant mit LieferantId " + LieferantId + " nicht erfolgreich");
+
+                        }
+
+                    }
+                    // eine da --> aktualisieren
+                    else
+                    {
+                        palette.ArtikelFile = ArtikelFile;
+                        if (SaveChanges() == 1)
+                        {
+                            retVal = palette.PaletteId;
+                        }
+                        else
+                        {
+                            Log.Error("Aktualisieren der Palette " + PalettenId + "  für Lieferant mit LieferantId " + LieferantId + " nicht erfolgreich");
+
+                        }
+                    }
+
+
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+
+            }
+            return retVal;
+        }
+
+        public Artikel GetArtikelById(int ArtikelId)
+        {
+            try
+            {
+                var artikel =
+                      (from a in Artikel
+                       where a.ArtikelId == ArtikelId
+                       select a).FirstOrDefault();
+
+
+                return artikel;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+        public void UpdateArtikel(Artikel Artikel)
+        {
+
+            try
+            {
+
+                var artikel = (from a in this.Artikel
+                               where a.PaletteId == Artikel.PaletteId && a.Artikelnummer == Artikel.Artikelnummer
+                               select a).FirstOrDefault();
+
+                if (artikel == null)
+                {
+                    Artikel newArtikel = this.Artikel.Create();
+                    newArtikel = Artikel;
+                    this.Artikel.Add(newArtikel);
+                    if (SaveChanges() == 0)
+                    {
+                        Log.Info("Artikel  " + newArtikel.Artikelnummer + " für Palette " + newArtikel.PaletteId + " wurde nicht hinzugefügt.");
+                    }
+
+                }
+                else
+                {
+                    this.Artikel.Attach(artikel);
+                    artikel.Artikelname = Artikel.Artikelname;
+                    if (SaveChanges() == 0)
+                    {
+                        Log.Info("Artikel  " + artikel.Artikelnummer + " für Palette " + artikel.PaletteId + " wurde nicht aktualisiert.");
+
+                    }
+                }
             }
             catch (Exception e)
             {

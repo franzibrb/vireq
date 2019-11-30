@@ -1,0 +1,20 @@
+﻿@using WebAppl.Models
+@model WebAppl.Models.PalettenModel
+
+@(Html
+   .Grid(Model.Paletten)
+   .Build(columns =>
+   {
+
+
+       columns.Add(model => model.ArtikelFile.ArtikelFileName).Titled("Dateiname");
+       columns.Add(model => model.ArtikelFile.PaletteUpdatedAt).Titled("Palette aktualisiert am");
+       columns.Add(model => model.Artikel != null ? model.Artikel.Count() : 0).Titled("Anzahl Artikel");
+       columns.Add(model => Html.ActionLink("zeige Artikel", "ByPalette", "Artikel", new { palettenId = model.PaletteId }, new { @class = "zeige-artikel-button" }));
+
+   })
+   .Empty("Keine Paletten vorhanden")
+   .Id("paletten-grid")
+   .Filterable()
+   .Sortable()
+)

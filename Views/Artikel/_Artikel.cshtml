@@ -1,0 +1,94 @@
+﻿@model int
+<h4>Artikel</h4>
+<div id="ArtikelGrid">
+
+    <div id="UpdatePalette">
+        <form id="UpdatePalettenForm" enctype="multipart/form-data" action="@Url.Action("UploadPalette", "File", new { palettenId = Model })" method="POST">
+            <div class="form-group">
+                <input type="file" id="dataFile" name="file" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Palette aktualisieren" class="btn btn-default" />
+            </div>
+
+            <div id="PalettenUpdateResult">
+
+            </div>
+        </form>
+
+
+    </div>
+    <div>
+        <div class="form-group">
+            <input type="button" id="ExportPaletteButton" class="btn btn-default" value="Palette exportieren" onclick="location.href='@Url.Action("DownloadPalette","File", new {palettenId = Model })'" />
+        </div>
+
+    </div>
+
+    @Html.AjaxGrid(Url.Action("IndexGrid", "Artikel", new { palettenId = Model }), new { id = "artikel-grid" })
+</div>
+
+<!-- Modal zum Bearbeiten-->
+<div id="ArtikelModalDialog" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id='ArtikelModalDialogContent'></div>
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    // Palette aktualisieren
+    $('#UpdatePalettenForm').submit(function (e) {
+
+        e.preventDefault(); // stop the standard form submission
+        $.ajax({
+            url: this.action,
+            type: this.method,
+            data: new FormData(this),
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                new MvcGrid(document.querySelector('#paletten-grid')).reload();
+                // Artikel leeren
+                $('#Artikel').empty();
+            },
+            error: function (xhr, error, status) {
+                // Danke IIS fürs Verschlucken meines Statustextes; sollte produktiv die Meldung aus der Action liefern
+                $('#PalettenUpdateResult').html(xhr.statusText);
+            }
+        });
+    });
+
+
+    // Grid Stuff
+    [].forEach.call(document.getElementsByClassName('mvc-grid'), function (element) {
+        new MvcGrid(element);
+    });
+
+
+
+    // Artikel bearbeiten
+    $('#ArtikelGrid').on(
+        'click', '.artikel-detail-button', function (e) {
+            $.ajax({
+                type: "GET",
+                url: this.href,
+                success: function (data) {
+                    $('#ArtikelModalDialogContent').html(data);
+                    $('#ArtikelModalDialog').modal('show');
+
+                },
+                error: function () {
+                    alert("Dynamic content load failed.");
+                }
+            });
+
+            return false; // Redirect verhindern
+        });
+    // Artikel löschen
+
+</script>

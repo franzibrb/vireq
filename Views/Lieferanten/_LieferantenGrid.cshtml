@@ -1,0 +1,24 @@
+﻿@using WebAppl.Models
+@model WebAppl.Models.LieferantenModel
+
+@(Html
+       .Grid(Model.Lieferanten)
+       .Build(columns =>
+       {
+           columns.Add(model => Html.CheckBox(model.LieferantId.ToString()));
+           columns.Add(model => Html.ActionLink("Bearbeiten", "Details", new { lieferantenId = model.LieferantId }, new { @class = "lieferanten-detail-button" }));
+           columns.Add(model => model.Lieferantennummer).Titled(Model.LieferantenFile?.LieferantenNummerColumnNameFromCSVImport);
+           columns.Add(model => Html.ActionLink(model.Lieferantenname, "ByLieferant", "Paletten", new { lieferantenId = model.LieferantId }, new { @class = "zeige-paletten-button" })).Titled(Model.LieferantenFile?.LieferantenNameColumnNameFromCSVImport);
+
+          columns.Add(model => model.Straße).Titled(Model.LieferantenFile?.LieferantenStraßeColumnNameFromCSVImport);
+           columns.Add(model => model.PLZ).Titled(Model.LieferantenFile?.LieferantenPLZColumnNameFromCSVImport);
+           columns.Add(model => model.Ort).Titled(Model.LieferantenFile?.LieferantenOrtColumnNameFromCSVImport);
+           columns.Add(model => model.Paletten != null ? model.Paletten.Count() : 0).Titled("Anzahl Paletten");
+
+
+       })
+       .Empty("Keine Lieferanten vorhanden")
+       .Id("lieferanten-grid")
+       .Filterable()
+       .Sortable()
+)

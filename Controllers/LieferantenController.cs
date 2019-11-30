@@ -21,8 +21,45 @@ namespace WebAppl.Controllers
 
         // GET: Lieferanten
         [CustomAuthorize]
-        public ActionResult Index(LieferantenModel model)
+        public ActionResult Index(LieferantenFile LieferantenFile)
         {
+            try
+            {
+
+                LieferantenFile = new LieferantenFile();
+
+                //LieferantenFile abfragen
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    int userId = ((CustomPrincipal)User).UserId;
+
+                    using (ApplicationDbContext context = new ApplicationDbContext())
+                    {
+
+                        User user = context.GetUserById(userId);
+                        if (user?.LieferantenFile != null)
+                        {
+                            LieferantenFile = user.LieferantenFile;
+                        }
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                ModelState.AddModelError("lieferantenabfrage", "Es ist ein Fehler bei der Abfrage Ihrer Kunden aufgetreten.");
+            }
+            return PartialView("~/Views/Lieferanten/_Lieferanten.cshtml", LieferantenFile);
+
+        }
+
+        // GET: Lieferanten/IndexGrid
+        [CustomAuthorize]
+        public PartialViewResult IndexGrid()
+        {
+            LieferantenModel model = new LieferantenModel();
+
             try
             {
                 model.Lieferanten = new List<Lieferant>();
@@ -57,13 +94,12 @@ namespace WebAppl.Controllers
             catch (Exception e)
             {
                 Log.Error(e.Message);
-                ModelState.AddModelError("lieferantenabfrage", "Es ist ein Fehler bei der Abfrage Ihrer Kunden aufgetreten.");
             }
-            return PartialView("~/Views/Lieferanten/_Lieferanten.cshtml", model);
+            return PartialView("~/Views/Lieferanten/_LieferantenGrid.cshtml", model);
 
         }
 
-        // GET: Lieferant/Details
+        // GET: Lieferanten/Details/{lieferantenId}
         [CustomAuthorize]
         [HttpGet]
         public ActionResult Details(int lieferantenId)
@@ -97,7 +133,7 @@ namespace WebAppl.Controllers
 
         }
 
-        // POST: Lieferant/Details
+        // POST: Lieferanten/Details
         [CustomAuthorize]
         [HttpPost]
         public ActionResult Details(Lieferant Lieferant)
@@ -107,7 +143,7 @@ namespace WebAppl.Controllers
                 using (ApplicationDbContext context = new ApplicationDbContext())
                 {
                     context.UpdateLieferant(Lieferant);
-                    
+
                 }
             }
             catch (Exception e)

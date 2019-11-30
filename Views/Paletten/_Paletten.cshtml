@@ -1,0 +1,36 @@
+﻿@model int
+
+
+<h3>Paletten</h3>
+
+<div id="PalettenGrid">
+    @Html.AjaxGrid(Url.Action("IndexGrid","Paletten",new { lieferantenId = Model }), new { id = "paletten-grid" })
+</div>
+
+
+<script type="text/javascript">
+    
+    // Zeigt die Artikel der gewählten Palette an
+    $('#PalettenGrid').on('click', '.zeige-artikel-button', function (e) {
+        $.ajax({
+            type: "GET",
+            url: this.href,
+            success: function (data) {
+                $('#Artikel').html(data);
+
+            },
+            error: function (xhr, error, status) {
+                $('#Artikel').html(xhr.statusText);
+            }
+        });
+
+        return false; // Redirect verhindern
+    });
+
+   
+
+    // Grid Stuff
+    [].forEach.call(document.getElementsByClassName('mvc-grid'), function (element) {
+        new MvcGrid(element);
+    });
+</script>
