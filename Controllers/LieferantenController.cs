@@ -18,7 +18,12 @@ namespace WebAppl.Controllers
         private static readonly ILog Log = LogManager.GetLogger(typeof(LieferantenController));
 
 
-
+        /// <summary>
+        /// Fragt die Infos des Lieferanten-Imports für den gerade angemeldeten Benutzer ab, 
+        /// kapselt diese in ein LieferantenFile und gibt dieses an die View weiter.
+        /// </summary>
+        /// <param name="LieferantenFile"></param>
+        /// <returns>PartialView mit LieferantenFile</returns>
         // GET: Lieferanten
         [CustomAuthorize]
         public ActionResult Index(LieferantenFile LieferantenFile)
@@ -54,6 +59,11 @@ namespace WebAppl.Controllers
 
         }
 
+        /// <summary>
+        /// Fragt die Lieferanten des angemeldeten Nutzers ab und packt diese in ein LieferantenModel.
+        /// Dieses wird an die View weitergereicht.
+        /// </summary>
+        /// <returns>PartialView mit LieferantenModel</returns>
         // GET: Lieferanten/IndexGrid
         [CustomAuthorize]
         public PartialViewResult IndexGrid()
@@ -99,6 +109,11 @@ namespace WebAppl.Controllers
 
         }
 
+        /// <summary>
+        /// Fragt den Lieferanten mit der übergebenen Id ab
+        /// </summary>
+        /// <param name="lieferantenId">Id des abzufragenden Lieferanten</param>
+        /// <returns>PartialView mit Lieferant; HttpNotFoundResult, wenn der Lieferant nicht gefunden wurde oder  HttpStatusCodeResult 500 im Fehlerfall</returns>
         // GET: Lieferanten/Details/{lieferantenId}
         [CustomAuthorize]
         [HttpGet]
@@ -133,6 +148,11 @@ namespace WebAppl.Controllers
 
         }
 
+        /// <summary>
+        /// Aktualisiert den übergebenen Lieferanten
+        /// </summary>
+        /// <param name="Lieferant">der zu aktualisierende Lieferant</param>
+        /// <returns>HttpStatusCodeResult 200 oder HttpStatusCodeResult 500 im Fehlerfall</returns>
         // POST: Lieferanten/Details
         [CustomAuthorize]
         [HttpPost]
@@ -156,7 +176,11 @@ namespace WebAppl.Controllers
 
         }
 
-
+        /// <summary>
+        /// Lösche die Lieferanten mit den übergebenen Ids
+        /// </summary>
+        /// <param name="lieferantenIds">die zu löschenden LieferantenIds</param>
+        /// <returns>HttpStatusCodeResult 200 oder HttpStatusCodeResult 500 im Fehlerfall</returns>
         // POST /Lieferanten/Delete
         [CustomAuthorize]
         [HttpPost]

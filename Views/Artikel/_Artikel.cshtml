@@ -27,6 +27,13 @@
     </div>
 
     @Html.AjaxGrid(Url.Action("IndexGrid", "Artikel", new { palettenId = Model }), new { id = "artikel-grid" })
+
+
+    <div class="form-group">
+        <input type="button" id="DeleteArtikelButton" class="btn btn-default" value="Artikel löschen" />
+    </div>
+    <div id="ArtikelDeleteResult">
+    </div>
 </div>
 
 <!-- Modal zum Bearbeiten-->
@@ -89,6 +96,51 @@
 
             return false; // Redirect verhindern
         });
-    // Artikel löschen
 
+    // Artikel löschen
+    $('#DeleteArtikelButton').click(function (e) {
+
+        // angehakte Checkboxen sammeln
+        var checkedArtikelInputCheckboxes = $("#ArtikelGrid td input[type=checkbox]:checked");
+        var artikelIds = [];
+        if (checkedArtikelInputCheckboxes.length > 0) {
+
+            //IDs der zu löschenden Artikel aufsammeln
+            checkedArtikelInputCheckboxes.each(function () {
+                var artikelId = parseInt($(this).attr("name"));
+                artikelIds.push(artikelId);
+            })
+
+
+
+            $.ajax({
+                type: "POST",
+                url: "/Artikel/Delete",
+                data: JSON.stringify({ artikelIds: artikelIds }),
+                contentType: "application/json; charset=utf-8",
+                traditional: true,
+                success: function (response) {
+                    // Zeilen entfernen
+                    checkedArtikelInputCheckboxes.each(function () {
+                        var row = $(this).closest("tr");
+                        if ($("#ArtikelGrid TBODY tr").length == 1) {
+                            row.find("td").html("&nbsp;");
+                            row.find("input").hide();
+                        } else {
+                            row.remove();
+                        }
+                    });
+
+                    //Palettengrid aktualisieren (Anzahl Artikel)
+                    new MvcGrid(document.querySelector('#paletten-grid')).reload();
+
+                },
+                error: function (xhr, error, status) {
+                    // Danke IIS fürs Verschlucken meines Statustextes; sollte produktiv die Meldung aus der Action liefern
+                    $('#ArtikelDeleteResult').html(xhr.statusText);
+                }
+            });
+
+        }
+    });
 </script>

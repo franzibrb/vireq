@@ -262,7 +262,7 @@ namespace WebAppl.Controllers
                                         };
                                         using (ApplicationDbContext context = new ApplicationDbContext())
                                         {
-                                            palettenId = context.UpdateArtikelDateiForLieferantAndPalette(lieferant.LieferantId, palettenId.HasValue ? palettenId.Value : -1, artikelFile);
+                                            palettenId = context.UpdatePalette(lieferant.LieferantId, palettenId.HasValue ? palettenId.Value : -1, artikelFile);
                                             if (palettenId < 0)
                                             {
                                                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.InternalServerError, "Fehler beim Schreiben in die DB. Bitte prüfen Sie die Log-Datei");

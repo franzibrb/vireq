@@ -13,7 +13,11 @@ namespace WebAppl.Controllers
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(ArtikelController));
 
-
+        /// <summary>
+        /// Kapselt lediglich die übergebene PalettenId und gibt sie an die View weiter
+        /// </summary>
+        /// <param name="palettenId">die an die View zu übergebene PalettenId</param>
+        /// <returns>PartialView mit übergebener PalettenId</returns>
         // GET: Artikel/ByPalette/{palettenId}
         [CustomAuthorize]
         [HttpGet]
@@ -25,6 +29,12 @@ namespace WebAppl.Controllers
 
         }
 
+        /// <summary>
+        /// Fragt die Artikel der übergebenen PalettenId ab und packt diese in ein ArtikelModel.
+        /// Dieses wird an die View weitergegeben.
+        /// </summary>
+        /// <param name="palettenId">PalettenId, für welche Artikel dargestellt werden sollen</param>
+        /// <returns>PartialViewResult mit ArtikelModel</returns>
         // GET: Artikel/IndexGrid/{palettenId}
         [CustomAuthorize]
         [HttpGet]
@@ -64,7 +74,11 @@ namespace WebAppl.Controllers
         }
 
 
-
+        /// <summary>
+        /// Fragt den Artikel mit der übergebenen Id ab
+        /// </summary>
+        /// <param name="artikelId">Id des abzufragenden Artikels</param>
+        /// <returns>PartialView mit Artikel; HttpNotFoundResult, wenn der Artikel nicht gefunden wurde oder HttpStatusCodeResult 500, wenn ein Fehler auftrat </returns>
         // GET: Artikel/Details/{artikelId}
         [CustomAuthorize]
         [HttpGet]
@@ -99,6 +113,11 @@ namespace WebAppl.Controllers
 
         }
 
+        /// <summary>
+        /// Aktualisiert den übergebenen Artikel
+        /// </summary>
+        /// <param name="Artikel">der zu aktualisierende Artikel</param>
+        /// <returns>HttpStatusCodeResult 200 oder HttpStatusCodeResult 500 im Fehlerfall</returns>
         // POST: Artikel/Details
         [CustomAuthorize]
         [HttpPost]
@@ -122,5 +141,46 @@ namespace WebAppl.Controllers
 
         }
 
+
+        /// <summary>
+        /// Löscht die Artikel mit den übergebenen Ids
+        /// </summary>
+        /// <param name="artikelIds">die zu löschenden ArtikelIds</param>
+        /// <returns>HttpStatusCodeResult 200 oder HttpStatusCodeResult 500 im Fehlerfall</returns>
+        // POST /Artikel/Delete
+        [CustomAuthorize]
+        [HttpPost]
+        public ActionResult Delete(string[] artikelIds)
+        {
+            try
+            {
+
+                using (ApplicationDbContext context = new ApplicationDbContext())
+                {
+                    IEnumerable<Artikel> artikel = new List<Artikel>();
+
+                    for (int i = 0; i < artikelIds.Length; i++)
+                    {
+                        Artikel art = context.GetArtikelById(int.Parse(artikelIds[i]));
+                        if (art != null)
+                        {
+                            context.DeleteArtikel(art);
+                        }
+                    }
+
+                }
+
+
+
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.InternalServerError, "Beim Löschen der Lieferanten ist ein Fehler aufgetreten.");
+
+            }
+            return new HttpStatusCodeResult(System.Net.HttpStatusCode.OK);
+
+        }
     }
 }

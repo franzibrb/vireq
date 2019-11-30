@@ -20,6 +20,33 @@ namespace WebAppl.Models
         public DbSet<Palette> Paletten { get; set; }
         public DbSet<Artikel> Artikel { get; set; }
 
+        #region Users
+
+        /// <summary>
+        /// Liefert den Nutzer mit der übergebenen UserId. 
+        /// </summary>
+        /// <param name="UserId"></param>
+        /// <returns>Nutzer mit der übergebenen Id oder null im Fehlerfall</returns>
+        public User GetUserById(int UserId)
+        {
+            try
+            {
+                var user = (from us in Users
+                            where us.UserId == UserId
+                            select us).FirstOrDefault();
+                return user;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+        #endregion
+
+
+        #region Lieferanten
         /// <summary>
         /// Liefert die Lieferanten für den Nutzer mit der übergebenen UserId. 
         /// 
@@ -38,76 +65,6 @@ namespace WebAppl.Models
 
                 lieferanten.ToList().ForEach(l => l.Paletten = GetPalettenForLieferantWithId(l.LieferantId)?.ToList());
                 return lieferanten;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.Message);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Liefert die Paletten für den Lieferanten mit der übergebenen LieferantenId. 
-        /// 
-        /// </summary>
-        /// <param name="LieferantenId">Id des Lieferanten, für den Paltten abgefragt werden sollen</param>
-        /// <returns>Liste von Paletten für den übergebenen LieferantenId oder null im Fehlerfall </returns>
-        public IEnumerable<Palette> GetPalettenForLieferantWithId(int LieferantenId)
-        {
-            IEnumerable<Palette> paletten = new List<Palette>();
-            try
-            {
-                paletten =
-                      (from p in Paletten
-                       where p.LieferantId == LieferantenId
-                       select p);
-
-                paletten.ToList().ForEach(p => p.Artikel = GetArtikelForPaletteWithId(p.PaletteId)?.ToList());
-                return paletten;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.Message);
-                return null;
-            }
-        }
-
-        public Palette GetPaletteById(int PalettenId)
-        {
-            try
-            {
-                var palette =
-                      (from p in Paletten
-                       where p.PaletteId == PalettenId
-                       select p).FirstOrDefault();
-
-                palette.Artikel = GetArtikelForPaletteWithId(PalettenId)?.ToList();
-                return palette;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.Message);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Liefert die Artikel für die Palette mit der übergebenen PalettenId. 
-        /// 
-        /// </summary>
-        /// <param name="PalettenId">Id der Palette, für welche Artikel abgefragt werden sollen</param>
-        /// <returns>Liste von Artikeln für die referenzierte Palette oder null im Fehlerfall </returns>
-        public IEnumerable<Artikel> GetArtikelForPaletteWithId(int PalettenId)
-        {
-            IEnumerable<Artikel> artikel = new List<Artikel>();
-            try
-            {
-                artikel =
-                      (from a in Artikel
-                       where a.PaletteId == PalettenId
-                       select a);
-
-                return artikel;
             }
             catch (Exception e)
             {
@@ -151,27 +108,6 @@ namespace WebAppl.Models
                                  where lief.Lieferantennummer == lieferantenNummer
                                  select lief).First();
                 return lieferant;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.Message);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Liefert den Nutzer mit der übergebenen UserId. 
-        /// </summary>
-        /// <param name="UserId"></param>
-        /// <returns>Nutzer mit der übergebenen Id oder null im Fehlerfall</returns>
-        public User GetUserById(int UserId)
-        {
-            try
-            {
-                var user = (from us in Users
-                            where us.UserId == UserId
-                            select us).FirstOrDefault();
-                return user;
             }
             catch (Exception e)
             {
@@ -296,10 +232,72 @@ namespace WebAppl.Models
 
         }
 
+        #endregion
 
 
+        #region Palette
+        /// <summary>
+        /// Liefert die Paletten für den Lieferanten mit der übergebenen LieferantenId. 
+        /// 
+        /// </summary>
+        /// <param name="LieferantenId">Id des Lieferanten, für den Paltten abgefragt werden sollen</param>
+        /// <returns>Liste von Paletten für den übergebenen LieferantenId oder null im Fehlerfall </returns>
+        public IEnumerable<Palette> GetPalettenForLieferantWithId(int LieferantenId)
+        {
+            IEnumerable<Palette> paletten = new List<Palette>();
+            try
+            {
+                paletten =
+                      (from p in Paletten
+                       where p.LieferantId == LieferantenId
+                       select p);
 
-        public int UpdateArtikelDateiForLieferantAndPalette(int LieferantId, int PalettenId, ArtikelFile ArtikelFile)
+                paletten.ToList().ForEach(p => p.Artikel = GetArtikelForPaletteWithId(p.PaletteId)?.ToList());
+                return paletten;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+
+        /// <summary>
+        /// Liefert die Palette mit der übergebenen Id
+        /// </summary>
+        /// <param name="PalettenId"></param>
+        /// <returns>Palette mit der übergebenen Id  oder null im Fehlerfall</returns>
+        public Palette GetPaletteById(int PalettenId)
+        {
+            try
+            {
+                var palette =
+                      (from p in Paletten
+                       where p.PaletteId == PalettenId
+                       select p).FirstOrDefault();
+
+                palette.Artikel = GetArtikelForPaletteWithId(PalettenId)?.ToList();
+                return palette;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Aktualisiert die Palette mit der übergebenen PalettenId für den Lieferanten mit der übergebenen LieferantenId.
+        /// Prüft, ob der Lieferant im System vorhanden ist.
+        /// Wenn die Palette bereits im System vorhanden ist, wird sie mit den Artikeldaten aktualisert. Andernfalls wird sie 
+        /// neu angelegt.
+        /// </summary>
+        /// <param name="LieferantId">Id des Lieferanten</param>
+        /// <param name="PalettenId">Id der Palette</param>
+        /// <param name="ArtikelFile">ArtikelFile, welche importiert werden soll</param>
+        /// <returns>die Id der akutalisierten oder neu hinzugefügten Palette oder -1 im Fehlerfall</returns>
+        public int UpdatePalette(int LieferantId, int PalettenId, ArtikelFile ArtikelFile)
         {
             int retVal = -1;
             try
@@ -362,6 +360,41 @@ namespace WebAppl.Models
             return retVal;
         }
 
+
+        #endregion
+
+        #region Artikel
+
+        /// <summary>
+        /// Liefert die Artikel für die Palette mit der übergebenen PalettenId. 
+        /// 
+        /// </summary>
+        /// <param name="PalettenId">Id der Palette, für welche Artikel abgefragt werden sollen</param>
+        /// <returns>Liste von Artikeln für die referenzierte Palette oder null im Fehlerfall </returns>
+        public IEnumerable<Artikel> GetArtikelForPaletteWithId(int PalettenId)
+        {
+            IEnumerable<Artikel> artikel = new List<Artikel>();
+            try
+            {
+                artikel =
+                      (from a in Artikel
+                       where a.PaletteId == PalettenId
+                       select a);
+
+                return artikel;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Liefert den Artikel mit der übergebenen Id
+        /// </summary>
+        /// <param name="ArtikelId">der abzufragende Artikel</param>
+        /// <returns>Artikel mit der übergebenen Id oder null im Fehlerfall</returns>
         public Artikel GetArtikelById(int ArtikelId)
         {
             try
@@ -381,6 +414,11 @@ namespace WebAppl.Models
             }
         }
 
+        /// <summary>
+        /// Aktualisiert den übergebenen Artikel anhand seiner PalettenId und Artikelnummer.
+        /// Wenn der Artikel noch nicht im System vorhanden ist, wird er erstellt.
+        /// </summary>
+        /// <param name="Artikel"></param>
         public void UpdateArtikel(Artikel Artikel)
         {
 
@@ -420,6 +458,48 @@ namespace WebAppl.Models
             }
 
         }
+
+
+        /// <summary>
+        /// Löscht den übergebenen Artikel
+        /// </summary>
+        /// <param name="Artikel"></param>
+        public void DeleteArtikel(Artikel Artikel)
+        {
+            try
+            {
+                if (Artikel != null)
+                {
+                    this.Artikel.Remove(Artikel);
+                    if (SaveChanges() == 0)
+                    {
+                        Log.Error("Artikel  " + Artikel.ArtikelId + " wurde nicht gelöscht.");
+                    }
+
+                }
+                else
+                {
+                    Log.Error("Artikel  " + Artikel.ArtikelId + " wurde nicht gefunden und konnte nicht gelöscht werden.");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+
+            }
+
+        }
+
+        #endregion
+
+
+
+
+
+
+
+
 
     }
 }
